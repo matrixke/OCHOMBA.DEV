@@ -1,0 +1,46 @@
+-- Create customers table
+CREATE TABLE public.customers (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  whatsapp TEXT,
+  subscription_type TEXT NOT NULL CHECK (subscription_type IN ('Basic', 'Premium', 'Enterprise')),
+  subscription_start_date DATE NOT NULL,
+  subscription_end_date DATE NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Create revenue table
+CREATE TABLE public.revenue (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  amount DECIMAL(10,2) NOT NULL,
+  date DATE NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+-- Enable Row Level Security
+ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.revenue ENABLE ROW LEVEL SECURITY;
+
+-- Create policies to allow all operations for now (since using password auth)
+CREATE POLICY "Allow all operations on customers" ON public.customers FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all operations on revenue" ON public.revenue FOR ALL USING (true) WITH CHECK (true);
+
+-- Create function to update timestamps
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger for automatic timestamp updates
+CREATE TRIGGER update_customers_updated_at
+  BEFORE UPDATE ON public.customers
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_updated_at_column();

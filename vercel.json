@@ -1,8 +1,39 @@
 {
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "public/api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/public/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
   "crons": [
     {
       "path": "/api/cron-deactivation",
       "schedule": "0 9 * * *"
     }
-  ]
+  ],
+  "env": {
+    "SUPABASE_URL": "@supabase_url",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
+    "KILLSWITCH_API_KEY": "@killswitch_api_key",
+    "PAYSTACK_SECRET_KEY": "@paystack_secret_key",
+    "PAYSTACK_PUBLIC_KEY": "@paystack_public_key"
+  }
 }

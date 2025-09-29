@@ -73,7 +73,8 @@ export function Dashboard() {
         blockedReason: customer.blocked_reason,
         blockedAt: customer.blocked_at ? new Date(customer.blocked_at) : undefined,
         unblockedAt: customer.unblocked_at ? new Date(customer.unblocked_at) : undefined,
-        customPrice: customer.custom_price,
+        customPrice: customer.custom_price && customer.custom_price > 0 ? customer.custom_price : undefined,
+        price: customer.price && customer.price > 0 ? customer.price : 10, // Default price $10 if missing or zero
         useCustomPrice: customer.use_custom_price,
         createdAt: new Date(customer.created_at),
       })));

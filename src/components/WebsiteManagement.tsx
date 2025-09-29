@@ -37,6 +37,7 @@ export function WebsiteManagement({ customers, onCustomerUpdate }: WebsiteManage
     domain: '',
     status: 'active' as 'active' | 'blocked' | 'maintenance'
   });
+  const [integrationSnippet, setIntegrationSnippet] = useState<string | null>(null);
 
   useEffect(() => {
     loadWebsites();
@@ -100,9 +101,13 @@ export function WebsiteManagement({ customers, onCustomerUpdate }: WebsiteManage
       setShowAddDialog(false);
       setFormData({ customerId: '', domain: '', status: 'active' });
 
+      // Generate integration snippet for universal control
+      const snippet = `<script src="https://ochomba.dev/killswitch-client.js" data-domain="${formData.domain}" data-api-key="YOUR_API_KEY"></script>\n<!-- Add this to your site's <head> or main template. Works with any framework. -->`;
+      setIntegrationSnippet(snippet);
+
       toast({
         title: "Success",
-        description: "Website added successfully!",
+        description: "Website added successfully! See integration instructions below.",
       });
     } catch (error) {
       console.error('Error adding website:', error);
@@ -274,7 +279,7 @@ export function WebsiteManagement({ customers, onCustomerUpdate }: WebsiteManage
   }
 
   return (
-    <div className="space-y-6">
+  <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -385,7 +390,6 @@ export function WebsiteManagement({ customers, onCustomerUpdate }: WebsiteManage
               Add Website
             </DialogTitle>
           </DialogHeader>
-          
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="customer">Customer</Label>
@@ -403,7 +407,6 @@ export function WebsiteManagement({ customers, onCustomerUpdate }: WebsiteManage
                 ))}
               </select>
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="domain">Domain</Label>
               <Input
@@ -412,8 +415,8 @@ export function WebsiteManagement({ customers, onCustomerUpdate }: WebsiteManage
                 value={formData.domain}
                 onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
               />
+              <span className="text-xs text-slate-500">Enter the root domain (e.g., mysite.com). Subdomains supported.</span>
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <select
@@ -428,7 +431,6 @@ export function WebsiteManagement({ customers, onCustomerUpdate }: WebsiteManage
               </select>
             </div>
           </div>
-
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
               Cancel
@@ -439,6 +441,22 @@ export function WebsiteManagement({ customers, onCustomerUpdate }: WebsiteManage
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Integration Instructions after adding a site */}
+      {integrationSnippet && (
+        <div className="p-4 mt-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h3 className="font-semibold text-blue-700 mb-2">Universal Integration Snippet</h3>
+          <p className="text-sm text-slate-700 mb-2">Add this code to your site's <code>&lt;head&gt;</code> or main template. Works with any framework (React, Vue, Angular, WordPress, etc.).</p>
+          <pre className="bg-slate-100 p-2 rounded text-xs overflow-x-auto mb-2">{integrationSnippet}</pre>
+          <Button
+            size="sm"
+            className="bg-blue-600 text-white"
+            onClick={() => navigator.clipboard.writeText(integrationSnippet)}
+          >
+            Copy Snippet
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
